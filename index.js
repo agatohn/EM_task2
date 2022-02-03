@@ -88,11 +88,30 @@ console.log(cheese);
 // Task 6
 console.log("task 6");
 
+// Simple .bind
+// Function.prototype.bindPolyfill = function (obj) {
+//   let f = this;
+//   return function () {
+//     return f.apply(obj);
+//   };
+// };
 Function.prototype.bindPolyfill = function (obj) {
-  let f = this;
-  return function () {
-    return f.apply(obj);
-  };
+  var currentFunc = this;
+
+  if (!currentFunc.rootFunc) {
+    innerFunc.rootFunc = currentFunc;
+  } else {
+    innerFunc.rootFunc = currentFunc.rootFunc;
+  }
+
+  function innerFunc() {
+    if (currentFunc.rootFunc) {
+      return currentFunc.rootFunc.call(obj);
+    }
+    return currentFunc.call(obj);
+  }
+
+  return innerFunc;
 };
 
 var func = function () {
@@ -100,9 +119,12 @@ var func = function () {
 };
 const obj1 = { prop: 1 };
 const obj2 = { prop: 2 };
+const obj3 = { prop: 3 };
 func = func.bindPolyfill(obj1);
 console.log(func()); // Will produce 1
 func = func.bindPolyfill(obj2);
+console.log(func()); // Will also produce 1 :(
+func = func.bindPolyfill(obj3);
 console.log(func()); // Will also produce 1 :(
 
 // Task 7
